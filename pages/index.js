@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
 import { database, auth } from "../lib/firebase";
-import { ref, onValue, set } from "firebase/database";
+import { ref, onValue, set, get } from "firebase/database";
 import { signInAnonymously, onAuthStateChanged } from "firebase/auth";
 
 // EDITE AQUI para o número do admin que receberá as mensagens (formato: DDI + DDD + número, sem sinais)
@@ -167,6 +167,46 @@ export default function Home() {
       setFirebaseStatus('OK: escrita permitida.');
     } catch (e) {
       setFirebaseStatus(`ERRO: ${e?.code || e?.message || 'permission_denied'}`);
+    }
+  }
+
+  // Exportar vendas para CSV
+  async function exportSalesToCSV() {
+    try {
+      const salesRef = ref(database, 'sales');
+      const snapshot = await get(salesRef);
+      const data = snapshot.val();
+      
+      if (!data) {
+        alert('Nenhuma venda registrada ainda.');
+        return;
+      }
+
+      const salesArray = Object.values(data);
+      
+      // Cabeçalho do CSV
+      let csv = 'Pedido,Data/Hora,Lote,Tipo,Quantidade,Valor Total,Nome Completo,Telefone\n';
+      
+      // Adiciona cada venda com múltiplas linhas para múltiplos compradores
+      salesArray.forEach(sale => {
+        const timestamp = new Date(sale.timestamp).toLocaleString('pt-BR');
+        sale.buyers.forEach((buyer, idx) => {
+          csv += `"${sale.orderId}","${timestamp}","${sale.lot}","${sale.ticketType}","${sale.quantity}","R$ ${sale.totalPrice}","${buyer.fullName}","${buyer.phone}"\n`;
+        });
+      });
+
+      // Criar blob e download
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `vendas-loop-eventos-${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (e) {
+      alert(`Erro ao exportar: ${e.message}`);
     }
   }
 
@@ -729,7 +769,7 @@ Por favor, me enviem a chave PIX e instruções de pagamento. Assim que eu envia
                 </div>
 
                 <div className="mt-6 flex justify-end">
-                  <button className="px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white">📊 Exportar CSV</button>
+                  <button onClick={exportSalesToCSV} className="px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white">📊 Exportar Vendas CSV</button>
                 </div>
               </div>
             )}
