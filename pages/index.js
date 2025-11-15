@@ -111,11 +111,15 @@ export default function Home() {
       (snapshot) => {
         const data = snapshot.val();
         if (data && Array.isArray(data)) {
-          // Parse expiresAt back to Date for logic
-          const parsed = data.map((lot) => ({
-            ...lot,
-            expiresAt: lot.expiresAt ? new Date(lot.expiresAt) : null,
-          }));
+          // Parse expiresAt back to Date for logic e garantir propriedades do lote 3
+          const parsed = data.map((lot) => {
+            const baseLot = LOTS.find(l => l.id === lot.id) || lot;
+            return {
+              ...baseLot, // Base com propriedades originais
+              ...lot,     // Override com dados do Firebase
+              expiresAt: lot.expiresAt ? new Date(lot.expiresAt) : null,
+            };
+          });
           setLotsConfig(parsed);
           setLotsConfigDraft(parsed);
         } else {
@@ -274,9 +278,16 @@ export default function Home() {
   }
 
   function updateLotPrice(lotId, field, value) {
-    const updatedConfig = lotsConfigDraft.map(lot => 
-      lot.id === lotId ? { ...lot, [field]: parseFloat(value) || 0 } : lot
-    );
+    const updatedConfig = lotsConfigDraft.map(lot => {
+      if (lot.id === lotId) {
+        const numericValue = value === '' ? 0 : parseFloat(value);
+        return { 
+          ...lot, 
+          [field]: isNaN(numericValue) ? 0 : numericValue 
+        };
+      }
+      return lot;
+    });
     setLotsConfigDraft(updatedConfig);
     setHasUnsavedChanges(true);
   }
