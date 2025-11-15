@@ -54,6 +54,7 @@ export default function Home() {
   const [authUid, setAuthUid] = useState(null);
   const [firebaseStatus, setFirebaseStatus] = useState("");
   const [salesStats, setSalesStats] = useState({ total: 0, revenue: 0, last24h: 0 });
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
   const ENV = useMemo(() => ({
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
     authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -72,6 +73,7 @@ export default function Home() {
     if (!auth || !database) {
       console.warn("Firebase não disponível, usando configuração local");
       setLotsConfig(LOTS.map(lot => ({ ...lot, active: true })));
+      setIsDataLoaded(true);
       return;
     }
 
@@ -133,6 +135,8 @@ export default function Home() {
           setLotsConfig(parsedInitial);
           setLotsConfigDraft(parsedInitial);
         }
+        // Marcar dados como carregados após sincronização
+        setIsDataLoaded(true);
       },
       (error) => {
         console.log("Firebase sync disabled or error:", error.message);
@@ -476,7 +480,16 @@ Por favor, me enviem a chave PIX e instruções de pagamento. Assim que eu envia
             </div>
 
             <div className="w-full mt-3 sm:mt-4 flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-4">
-              {lotsConfig.filter(lot => lot.active).map((lot) => {
+              {!isDataLoaded ? (
+                // Loading state - impede flash de conteúdo
+                <div className="w-full flex justify-center items-center py-8">
+                  <div className="flex items-center gap-3">
+                    <div className="w-6 h-6 border-2 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+                    <span className="text-purple-300 text-sm">Carregando lotes...</span>
+                  </div>
+                </div>
+              ) : (
+                lotsConfig.filter(lot => lot.active).map((lot) => {
                 const vagas = vagasDisplay.find((v) => v.lotId === lot.id)?.vagas ?? 10;
                 return (
                   <div key={lot.id} className="rounded-lg p-3 w-full sm:w-64" style={{background: 'rgba(10,10,10,0.6)', border: '1px solid rgba(124,77,255,0.18)', boxShadow: '0 0 18px rgba(124,77,255,0.06)'}}>
@@ -545,7 +558,8 @@ Por favor, me enviem a chave PIX e instruções de pagamento. Assim que eu envia
                     </div>
                   </div>
                 );
-              })}
+              })
+              )}
             </div>
           </div>
         </motion.section>
