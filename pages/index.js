@@ -4,6 +4,7 @@ import { database, auth } from "../lib/firebase";
 import { ref, onValue, set, get } from "firebase/database";
 import { signInAnonymously, onAuthStateChanged } from "firebase/auth";
 
+
 // EDITE AQUI para o número do admin que receberá as mensagens (formato: DDI + DDD + número, sem sinais)
 const ADMIN_WA_NUMBER = "5587981758255"; // ex: 55 (Brasil) + DDD(87) + número
 
@@ -577,9 +578,34 @@ Por favor, me enviem a chave PIX e instruções de pagamento. Assim que eu envia
 
             <div className="space-y-4 max-h-96 overflow-y-auto mb-4">
               {ticketType !== "couple" && (
-                <div className="flex items-center gap-2 mb-4">
+                <div className="flex items-center justify-between mb-4">
                   <label className="text-base text-white font-semibold">Quantidade de ingressos:</label>
-                  <input type="number" min={1} value={quantity} onChange={(e) => handleQuantityChange(e.target.value)} className="w-20 p-2 rounded bg-gray-800 text-white" />
+                  
+                  {/* Controle estilo iFood */}
+                  <div className="flex items-center bg-gray-800 rounded-lg border border-purple-500/30 overflow-hidden">
+                    <button
+                      onClick={() => handleQuantityChange(Math.max(1, quantity - 1))}
+                      disabled={quantity <= 1}
+                      className={`w-10 h-10 flex items-center justify-center text-lg font-bold transition-colors ${
+                        quantity <= 1 
+                          ? 'text-gray-500 cursor-not-allowed' 
+                          : 'text-white hover:bg-purple-600/50 active:bg-purple-600'
+                      }`}
+                    >
+                      −
+                    </button>
+                    
+                    <div className="w-12 h-10 flex items-center justify-center bg-gray-900 text-white font-semibold text-base border-x border-purple-500/30">
+                      {quantity}
+                    </div>
+                    
+                    <button
+                      onClick={() => handleQuantityChange(quantity + 1)}
+                      className="w-10 h-10 flex items-center justify-center text-lg font-bold text-white hover:bg-purple-600/50 active:bg-purple-600 transition-colors"
+                    >
+                      +
+                    </button>
+                  </div>
                 </div>
               )}
 
