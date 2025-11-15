@@ -524,7 +524,7 @@ Por favor, me enviem a chave PIX e instruções de pagamento. Assim que eu envia
                             cursor: 'pointer'
                           }}
                         >
-                          👤 Normal — R$ 40
+                          👤 Normal — R$ {lot.price}
                         </button>
                       ) : (
                         <button
@@ -551,7 +551,7 @@ Por favor, me enviem a chave PIX e instruções de pagamento. Assim que eu envia
                             cursor: 'pointer'
                           }}
                         >
-                          💍 Casadinha — R$ 60
+                          💍 Casadinha — R$ {lot.couplePrice || lot.price}
                         </button>
                       )}
                       {lot.id !== "lot3" && (
