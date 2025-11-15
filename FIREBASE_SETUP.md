@@ -23,21 +23,25 @@
 3. Registre seu app com o nome "Loop Eventos Web"
 4. Copie todo o objeto `firebaseConfig`
 
-## Passo 4: Configurar no projeto
+## Passo 4: Variáveis de ambiente (recomendado)
 
-Abra o arquivo `lib/firebase.js` e substitua as credenciais:
+Em vez de colocar credenciais no código, use variáveis de ambiente. Copie os valores do `firebaseConfig` (Passo 3) e defina:
 
-```javascript
-const firebaseConfig = {
-  apiKey: "AIza...", // Cole aqui
-  authDomain: "loop-eventos-xxxx.firebaseapp.com",
-  databaseURL: "https://loop-eventos-xxxx-default-rtdb.firebaseio.com",
-  projectId: "loop-eventos-xxxx",
-  storageBucket: "loop-eventos-xxxx.appspot.com",
-  messagingSenderId: "123456789",
-  appId: "1:123456789:web:abc123def456"
-};
-```
+Chaves (todas obrigatórias):
+
+- `NEXT_PUBLIC_FIREBASE_API_KEY`
+- `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`
+- `NEXT_PUBLIC_FIREBASE_DATABASE_URL` (ex.: `https://SEU_PROJETO-default-rtdb.firebaseio.com`)
+- `NEXT_PUBLIC_FIREBASE_PROJECT_ID`
+- `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`
+- `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`
+- `NEXT_PUBLIC_FIREBASE_APP_ID`
+
+Locais para configurar:
+- Local: crie um arquivo `.env.local` na raiz do projeto
+- Netlify (produção): Site settings → Build & deploy → Environment → Add variables
+
+O arquivo `lib/firebase.js` já lê essas variáveis automaticamente.
 
 ## Passo 5: Configurar regras de segurança
 
@@ -56,6 +60,14 @@ No Firebase Console > Realtime Database > Regras, substitua por:
 
 **IMPORTANTE:** Para produção, configure autenticação adequada!
 
+## Passo 6: Habilitar autenticação anônima
+
+Como o projeto usa `signInAnonymously` para permitir `.write` (regra `auth != null`), ative:
+
+1. Firebase Console → Authentication → Sign-in method
+2. Ative "Anonymous"
+3. Salve
+
 ## Como funciona
 
 - **Leitura:** Todos podem ver os lotes atualizados em tempo real
@@ -65,7 +77,7 @@ No Firebase Console > Realtime Database > Regras, substitua por:
 ## Testando
 
 1. Abra o site em dois navegadores diferentes
-2. Faça login no admin em um deles
+2. Faça login no admin (usuário/senha local do app)
 3. Altere um preço ou desative um lote
 4. Veja a alteração aparecer instantaneamente no outro navegador!
 
