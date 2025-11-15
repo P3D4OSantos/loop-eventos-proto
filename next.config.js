@@ -5,8 +5,9 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  assetPrefix: process.env.NODE_ENV === 'production' ? '/loop-eventos-proto' : '',
-  basePath: process.env.NODE_ENV === 'production' ? '/loop-eventos-proto' : '',
+  swcMinify: true,
+  reactStrictMode: true,
+  poweredByHeader: false,
 };
 
 module.exports = nextConfig;
