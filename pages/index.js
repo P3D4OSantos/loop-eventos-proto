@@ -55,6 +55,8 @@ export default function Home() {
   const [firebaseStatus, setFirebaseStatus] = useState("");
   const [salesStats, setSalesStats] = useState({ total: 0, revenue: 0, last24h: 0 });
   const [isDataLoaded, setIsDataLoaded] = useState(false);
+  const [activeAdminTab, setActiveAdminTab] = useState("config"); // "config" ou "sales"
+  const [salesData, setSalesData] = useState([]);
   const ENV = useMemo(() => ({
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
     authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -93,8 +95,13 @@ export default function Home() {
       const data = snapshot.val();
       console.log("📊 Sales data from Firebase:", data); // Debug log
       if (data) {
-        const salesArray = Object.values(data);
+        const salesArray = Object.values(data).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
         console.log("📊 Sales array processed:", salesArray.length, "vendas"); // Debug log
+        
+        // Guardar dados detalhados para a aba de vendas
+        setSalesData(salesArray);
+        
+        // Calcular métricas
         const total = salesArray.reduce((sum, sale) => sum + (sale.quantity || 0), 0);
         const revenue = salesArray.reduce((sum, sale) => sum + (sale.totalPrice || 0), 0);
         const last24h = salesArray.filter(sale => {
@@ -106,6 +113,7 @@ export default function Home() {
         console.log("📊 Stats updated:", { total, revenue, last24h }); // Debug log
       } else {
         console.log("📊 No sales data found in Firebase"); // Debug log
+        setSalesData([]);
         setSalesStats({ total: 0, revenue: 0, last24h: 0 });
       }
     }, (error) => {
@@ -326,8 +334,9 @@ export default function Home() {
       const salesRef = ref(database, 'sales');
       await set(salesRef, null);
       
-      // Reset local das métricas
+      // Reset local das métricas e dados
       setSalesStats({ total: 0, revenue: 0, last24h: 0 });
+      setSalesData([]);
       
       alert('✅ Métricas limpas com sucesso!\n\nTodas as vendas de teste foram removidas.');
       console.log("🗑️ Sales metrics reset completed");
@@ -764,6 +773,35 @@ Por favor, me enviem a chave PIX e instruções de pagamento. Assim que eu envia
               </div>
             ) : (
               <div>
+                {/* Navegação por Abas */}
+                <div className="border-b border-purple-500/30 mb-6">
+                  <div className="flex space-x-1">
+                    <button
+                      onClick={() => setActiveAdminTab("config")}
+                      className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
+                        activeAdminTab === "config"
+                          ? "bg-purple-600 text-white border-b-2 border-purple-400"
+                          : "text-purple-300 hover:text-white hover:bg-purple-800/50"
+                      }`}
+                    >
+                      ⚙️ Configurações
+                    </button>
+                    <button
+                      onClick={() => setActiveAdminTab("sales")}
+                      className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
+                        activeAdminTab === "sales"
+                          ? "bg-purple-600 text-white border-b-2 border-purple-400"
+                          : "text-purple-300 hover:text-white hover:bg-purple-800/50"
+                      }`}
+                    >
+                      📊 Vendas ao Vivo ({salesData.length})
+                    </button>
+                  </div>
+                </div>
+
+                {/* Aba de Configurações */}
+                {activeAdminTab === "config" && (
+                <div>
                 <div className="flex justify-between items-center mb-4">
                   <div>
                     <p className="text-purple-300">Bem-vindo, <strong>{adminUsername}</strong></p>
@@ -898,6 +936,61 @@ Por favor, me enviem a chave PIX e instruções de pagamento. Assim que eu envia
                 <div className="mt-6 flex justify-end">
                   <button onClick={exportSalesToCSV} className="px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white">📊 Exportar Vendas CSV</button>
                 </div>
+                </div>
+                )}
+
+                {/* Aba de Vendas ao Vivo */}
+                {activeAdminTab === "sales" && (
+                <div>
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-bold text-white">🔴 Vendas em Tempo Real</h3>
+                    <div className="text-sm text-purple-300">
+                      {salesData.length} {salesData.length === 1 ? 'venda' : 'vendas'} registradas
+                    </div>
+                  </div>
+
+                  {salesData.length === 0 ? (
+                    <div className="text-center py-8 text-gray-400">
+                      <div className="text-4xl mb-2">📭</div>
+                      <p>Nenhuma venda registrada ainda</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3 max-h-96 overflow-y-auto">
+                      {salesData.map((sale) => (
+                        <div key={sale.orderId} className="bg-white/5 p-4 rounded-lg border border-purple-500/20">
+                          <div className="flex justify-between items-start mb-3">
+                            <div>
+                              <span className="text-xs bg-purple-600 text-white px-2 py-1 rounded font-mono">
+                                {sale.orderId}
+                              </span>
+                              <span className="ml-2 text-xs text-purple-300">
+                                {new Date(sale.timestamp).toLocaleString('pt-BR')}
+                              </span>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-sm font-bold text-green-400">R$ {sale.totalPrice}</div>
+                              <div className="text-xs text-gray-400">{sale.lot}</div>
+                            </div>
+                          </div>
+                          
+                          <div className="text-sm text-white">
+                            <strong>Tipo:</strong> {sale.ticketType} | <strong>Qtd:</strong> {sale.quantity}
+                          </div>
+                          
+                          <div className="mt-2 space-y-1">
+                            {sale.buyers.map((buyer, idx) => (
+                              <div key={idx} className="text-sm text-purple-200 bg-black/20 p-2 rounded">
+                                <strong>{buyer.fullName}</strong> - {buyer.phone}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                )}
+
               </div>
             )}
           </div>
