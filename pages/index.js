@@ -6,7 +6,7 @@ import { signInAnonymously, onAuthStateChanged } from "firebase/auth";
 
 
 // EDITE AQUI para o número do admin que receberá as mensagens (formato: DDI + DDD + número, sem sinais)
-const ADMIN_WA_NUMBER = "5587981270398"; // ex: 55 (Brasil) + DDD(87) + número
+const ADMIN_WA_NUMBER = "5587991270398"; // ex: 55 (Brasil) + DDD(87) + número
 
 // Mock data
 const EVENT = {
