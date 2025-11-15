@@ -31,7 +31,7 @@ Chaves (todas obrigatórias):
 
 - `NEXT_PUBLIC_FIREBASE_API_KEY`
 - `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`
-- `NEXT_PUBLIC_FIREBASE_DATABASE_URL` (ex.: `https://SEU_PROJETO-default-rtdb.firebaseio.com`)
+- `NEXT_PUBLIC_FIREBASE_DATABASE_URL` (ex.: `https://SEU_PROJETO-default-rtdb.firebasedatabase.app`)
 - `NEXT_PUBLIC_FIREBASE_PROJECT_ID`
 - `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`
 - `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`
@@ -50,9 +50,17 @@ No Firebase Console > Realtime Database > Regras, substitua por:
 ```json
 {
   "rules": {
-    "lotsConfig": {
-      ".read": true,
-      ".write": "auth != null"
+    "lotsConfig": { 
+      ".read": true, 
+      ".write": "auth != null" 
+    },
+    "sales": { 
+      ".read": "auth != null",
+      ".write": "auth != null" 
+    },
+    "__ping": { 
+      ".read": true, 
+      ".write": "auth != null" 
     }
   }
 }
@@ -74,6 +82,10 @@ Como o projeto usa `signInAnonymously` para permitir `.write` (regra `auth != nu
 - **Escrita:** Apenas admin autenticado pode alterar (quando configurar auth)
 - **Sincronização:** Alterações aparecem instantaneamente em todos os dispositivos
 
+### Dicas de diagnóstico
+- Se aparecer `auth/api-key-not-valid`, confirme a API Key e a URL do Realtime Database do mesmo projeto.
+- No painel Admin, use o botão “Testar Firebase” para verificar escrita em `/__ping`.
+
 ## Testando
 
 1. Abra o site em dois navegadores diferentes
@@ -83,9 +95,19 @@ Como o projeto usa `signInAnonymously` para permitir `.write` (regra `auth != nu
 
 ## Dados salvos no Firebase
 
+### `/lotsConfig` - Configuração dos lotes
 - Status ativo/desativado de cada lote
 - Preços (normal, mulher 0800, casadinha)
 - Capacidade dos lotes
+- Data de expiração
+
+### `/sales` - Vendas registradas
+- ID do pedido
+- Lista de compradores (nome + telefone validado com DDD)
+- Lote, tipo de ingresso, quantidade
+- Preço unitário e total
+- Timestamp da venda
+- **Registra quando o usuário clica para enviar no WhatsApp**
 
 ## Próximos passos (opcional)
 
