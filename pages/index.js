@@ -450,16 +450,40 @@ export default function Home() {
     setOrder(payload);
     setShowCheckout(false);
 
-    // Salvar venda no Firebase
-    const salesRef = ref(database, `sales/${id}`);
-    console.log("💾 Salvando venda no Firebase:", id, payload); // Debug log
-    set(salesRef, payload)
-      .then(() => {
-        console.log("✅ Venda salva com sucesso:", id); // Success log
-      })
-      .catch(err => {
-        console.error("❌ Erro ao salvar venda:", err.message); // Error log
-      });
+    // Salvar venda no Firebase com retry
+    const saveSaleToFirebase = async (attempt = 1) => {
+      const salesRef = ref(database, `sales/${id}`);
+      console.log(`💾 Tentativa ${attempt}: Salvando venda no Firebase:`, id, payload);
+      
+      try {
+        await set(salesRef, payload);
+        console.log("✅ Venda salva com sucesso:", id);
+        // Mostrar confirmação visual ao usuário
+        if (attempt > 1) {
+          alert("✅ Pedido registrado com sucesso após retry!");
+        }
+      } catch (err) {
+        console.error(`❌ Erro na tentativa ${attempt}:`, err.message);
+        
+        if (attempt < 3) {
+          // Retry automático após 2 segundos
+          console.log(`🔄 Tentando novamente em 2s... (tentativa ${attempt + 1}/3)`);
+          setTimeout(() => saveSaleToFirebase(attempt + 1), 2000);
+        } else {
+          // Falha definitiva - alertar usuário
+          console.error("❌ Falha definitiva ao salvar no Firebase após 3 tentativas");
+          alert(`⚠️ ATENÇÃO: Sua mensagem foi enviada para o WhatsApp, mas houve um problema técnico no registro.\n\nSeu pedido ${id} será processado manualmente.\n\nNão se preocupe - você receberá a resposta no WhatsApp normalmente!`);
+        }
+      }
+    };
+    
+    // Verificar se Firebase está disponível
+    if (!database) {
+      console.warn("⚠️ Firebase não disponível - apenas WhatsApp funcionará");
+      alert("⚠️ Sistema em modo offline - seu pedido será processado via WhatsApp.");
+    } else {
+      saveSaleToFirebase();
+    }
 
     const text = `Olá Loop Eventos!
 
