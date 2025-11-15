@@ -67,6 +67,13 @@ export default function Home() {
       LOTS.map((l) => ({ lotId: l.id, vagas: getRandomVagas(l.capacity) }))
     );
 
+    // Verificar se Firebase está disponível
+    if (!auth || !database) {
+      console.warn("Firebase não disponível, usando configuração local");
+      setLotsConfig(LOTS.map(lot => ({ ...lot, active: true })));
+      return;
+    }
+
     // Auth anônima para habilitar regras com auth != null (não bloqueante)
     signInAnonymously(auth).catch((err) => {
       console.log("Firebase anonymous auth error:", err?.message);
@@ -131,12 +138,19 @@ export default function Home() {
       }
     );
 
-    return () => { unsubscribe(); off(); unsubscribeSales(); };
+    return () => { 
+      if (unsubscribe) unsubscribe();
+      if (off) off();
+      if (unsubscribeSales) unsubscribeSales();
+    };
   }, []);
 
   // Garante que há um usuário anônimo autenticado antes de escrever
   async function ensureAuth() {
     try {
+      if (!auth) {
+        throw new Error("Firebase Auth não disponível");
+      }
       if (!auth.currentUser) {
         await signInAnonymously(auth);
       }
