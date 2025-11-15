@@ -53,6 +53,8 @@ export default function Home() {
   const [adminPassword, setAdminPassword] = useState("");
   const [vagasDisplay, setVagasDisplay] = useState([]);
   const [lotsConfig, setLotsConfig] = useState(LOTS.map(lot => ({ ...lot, active: true })));
+  const [lotsConfigDraft, setLotsConfigDraft] = useState(LOTS.map(lot => ({ ...lot, active: true })));
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [authUid, setAuthUid] = useState(null);
   const [firebaseStatus, setFirebaseStatus] = useState("");
   const [salesStats, setSalesStats] = useState({ total: 0, revenue: 0, last24h: 0 });
@@ -110,6 +112,7 @@ export default function Home() {
             expiresAt: lot.expiresAt ? new Date(lot.expiresAt) : null,
           }));
           setLotsConfig(parsed);
+          setLotsConfigDraft(parsed);
         } else {
           // Seed inicial com configuração local caso não exista
           const initial = LOTS.map((lot) => ({
@@ -125,6 +128,7 @@ export default function Home() {
           // Ajustar para Date na memória
           const parsedInitial = initial.map((lot) => ({ ...lot, expiresAt: new Date(lot.expiresAt) }));
           setLotsConfig(parsedInitial);
+          setLotsConfigDraft(parsedInitial);
         }
       },
       (error) => {
@@ -248,29 +252,36 @@ export default function Home() {
   }
 
   function toggleLotActive(lotId) {
-    const updatedConfig = lotsConfig.map(lot => 
+    const updatedConfig = lotsConfigDraft.map(lot => 
       lot.id === lotId ? { ...lot, active: !lot.active } : lot
     );
-    setLotsConfig(updatedConfig);
-
-    // Salva no Firebase (garante auth)
-    saveLotsConfig(updatedConfig).catch(err => {
-      console.log("Firebase save error:", err.message);
-      alert('Sem permissão para salvar. Ative Anonymous Auth e regras do DB.');
-    });
+    setLotsConfigDraft(updatedConfig);
+    setHasUnsavedChanges(true);
   }
 
   function updateLotPrice(lotId, field, value) {
-    const updatedConfig = lotsConfig.map(lot => 
+    const updatedConfig = lotsConfigDraft.map(lot => 
       lot.id === lotId ? { ...lot, [field]: parseFloat(value) || 0 } : lot
     );
-    setLotsConfig(updatedConfig);
+    setLotsConfigDraft(updatedConfig);
+    setHasUnsavedChanges(true);
+  }
 
-    // Salva no Firebase (garante auth)
-    saveLotsConfig(updatedConfig).catch(err => {
+  async function saveChanges() {
+    try {
+      await saveLotsConfig(lotsConfigDraft);
+      setLotsConfig(lotsConfigDraft);
+      setHasUnsavedChanges(false);
+      alert('Alterações salvas com sucesso!');
+    } catch (err) {
       console.log("Firebase save error:", err.message);
-      alert('Sem permissão para salvar. Ative Anonymous Auth e regras do DB.');
-    });
+      alert('Erro ao salvar. Verifique as permissões do Firebase.');
+    }
+  }
+
+  function discardChanges() {
+    setLotsConfigDraft(lotsConfig);
+    setHasUnsavedChanges(false);
   }
 
   function openCheckout(lot, type = "normal") {
@@ -688,9 +699,17 @@ Por favor, me enviem a chave PIX e instruções de pagamento. Assim que eu envia
                 </div>
 
                 <div className="mt-6">
-                  <h4 className="font-bold text-white mb-3">⚙️ Gerenciar Lotes</h4>
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-bold text-white">⚙️ Gerenciar Lotes</h4>
+                    {hasUnsavedChanges && (
+                      <div className="flex gap-2">
+                        <button onClick={discardChanges} className="text-sm px-3 py-1 rounded bg-gray-600 hover:bg-gray-700 text-white">Descartar</button>
+                        <button onClick={saveChanges} className="text-sm px-3 py-1 rounded bg-green-600 hover:bg-green-700 text-white font-bold">💾 Salvar Alterações</button>
+                      </div>
+                    )}
+                  </div>
                   <div className="space-y-3">
-                    {lotsConfig.map((lot) => (
+                    {lotsConfigDraft.map((lot) => (
                       <div key={lot.id} className="bg-white/5 p-4 rounded border border-purple-500/30">
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center gap-3">
