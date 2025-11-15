@@ -48,8 +48,8 @@ export default function Home() {
   const [adminUsername, setAdminUsername] = useState("");
   const [adminPassword, setAdminPassword] = useState("");
   const [vagasDisplay, setVagasDisplay] = useState([]);
-  const [lotsConfig, setLotsConfig] = useState(LOTS.map(lot => ({ ...lot, active: true })));
-  const [lotsConfigDraft, setLotsConfigDraft] = useState(LOTS.map(lot => ({ ...lot, active: true })));
+  const [lotsConfig, setLotsConfig] = useState(LOTS.map(lot => ({ ...lot, active: lot.id === 'lot1' })));
+  const [lotsConfigDraft, setLotsConfigDraft] = useState(LOTS.map(lot => ({ ...lot, active: lot.id === 'lot1' })));
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [authUid, setAuthUid] = useState(null);
   const [firebaseStatus, setFirebaseStatus] = useState("");
@@ -74,7 +74,7 @@ export default function Home() {
     // Verificar se Firebase está disponível
     if (!auth || !database) {
       console.warn("Firebase não disponível, usando configuração local");
-      setLotsConfig(LOTS.map(lot => ({ ...lot, active: true })));
+      setLotsConfig(LOTS.map(lot => ({ ...lot, active: lot.id === 'lot1' })));
       setIsDataLoaded(true);
       return;
     }
@@ -83,8 +83,8 @@ export default function Home() {
     const fallbackTimeout = setTimeout(() => {
       console.warn("🚨 Firebase timeout - mostrando lotes locais para não travar interface");
       setFirebaseStatus("Offline - usando configuração local");
-      setLotsConfig(LOTS.map(lot => ({ ...lot, active: true })));
-      setLotsConfigDraft(LOTS.map(lot => ({ ...lot, active: true })));
+      setLotsConfig(LOTS.map(lot => ({ ...lot, active: lot.id === 'lot1' })));
+      setLotsConfigDraft(LOTS.map(lot => ({ ...lot, active: lot.id === 'lot1' })));
       setIsDataLoaded(true);
     }, 3000); // Reduzido de 5s para 3s
 
@@ -162,7 +162,7 @@ export default function Home() {
           // Seed inicial com configuração local caso não exista
           const initial = LOTS.map((lot) => ({
             ...lot,
-            active: true,
+            active: lot.id === 'lot1', // Apenas 1º lote ativo por padrão
             // Salvar como ISO string para compatibilidade
             expiresAt: lot.expiresAt instanceof Date ? lot.expiresAt.toISOString() : lot.expiresAt,
           }));
@@ -182,8 +182,8 @@ export default function Home() {
         console.log("Firebase sync disabled or error:", error.message);
         clearTimeout(fallbackTimeout); // Cancelar timeout mesmo em caso de erro
         // Em caso de erro, usar configuração local e mostrar interface
-        setLotsConfig(LOTS.map(lot => ({ ...lot, active: true })));
-        setLotsConfigDraft(LOTS.map(lot => ({ ...lot, active: true })));
+        setLotsConfig(LOTS.map(lot => ({ ...lot, active: lot.id === 'lot1' })));
+        setLotsConfigDraft(LOTS.map(lot => ({ ...lot, active: lot.id === 'lot1' })));
         setIsDataLoaded(true);
         setFirebaseStatus("Erro de conectividade");
       }
@@ -962,7 +962,7 @@ Por favor, me enviem a chave PIX e instruções de pagamento. Assim que eu envia
                     )}
                   </div>
                   <div className="space-y-3">
-                    {lotsConfigDraft.map((lot) => (
+                    {lotsConfigDraft.filter(lot => lot.active).map((lot) => (
                       <div key={lot.id} className="bg-white/5 p-4 rounded border border-purple-500/30">
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center gap-3">
