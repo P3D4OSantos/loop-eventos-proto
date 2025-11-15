@@ -79,6 +79,15 @@ export default function Home() {
       return;
     }
 
+    // TIMEOUT DE FALLBACK - Se Firebase demorar mais que 3 segundos, mostra lotes locais
+    const fallbackTimeout = setTimeout(() => {
+      console.warn("🚨 Firebase timeout - mostrando lotes locais para não travar interface");
+      setFirebaseStatus("Offline - usando configuração local");
+      setLotsConfig(LOTS.map(lot => ({ ...lot, active: true })));
+      setLotsConfigDraft(LOTS.map(lot => ({ ...lot, active: true })));
+      setIsDataLoaded(true);
+    }, 3000); // Reduzido de 5s para 3s
+
     // Auth anônima para habilitar regras com auth != null (não bloqueante)
     signInAnonymously(auth).catch((err) => {
       console.log("Firebase anonymous auth error:", err?.message);
@@ -92,11 +101,11 @@ export default function Home() {
     // Sincronizar métricas de vendas com detecção de problemas
     const salesRef = ref(database, 'sales');
     
-    // Timeout para detectar problemas de conectividade  
+    // Timeout para detectar problemas de conectividade nas vendas
     let connectionTimeout = setTimeout(() => {
-      console.warn("⚠️ Firebase demorou para responder - possível problema de rede");
-      setFirebaseStatus("Conectividade lenta ou bloqueada");
-    }, 5000);
+      console.warn("⚠️ Firebase sales demorou para responder - possível problema de rede");
+      setFirebaseStatus("Vendas offline");
+    }, 3000); // Reduzido para 3s
     
     const unsubscribeSales = onValue(salesRef, (snapshot) => {
       clearTimeout(connectionTimeout); // Cancelar timeout se dados chegaram
@@ -133,6 +142,7 @@ export default function Home() {
     const unsubscribe = onValue(
       lotsRef,
       (snapshot) => {
+        clearTimeout(fallbackTimeout); // Cancelar fallback se Firebase responder
         const data = snapshot.val();
         if (data && Array.isArray(data)) {
           // Parse expiresAt back to Date for logic e garantir propriedades do lote 3
@@ -146,6 +156,8 @@ export default function Home() {
           });
           setLotsConfig(parsed);
           setLotsConfigDraft(parsed);
+          console.log("🔥 Firebase conectado - usando configuração remota");
+          setFirebaseStatus("");
         } else {
           // Seed inicial com configuração local caso não exista
           const initial = LOTS.map((lot) => ({
@@ -168,10 +180,17 @@ export default function Home() {
       },
       (error) => {
         console.log("Firebase sync disabled or error:", error.message);
+        clearTimeout(fallbackTimeout); // Cancelar timeout mesmo em caso de erro
+        // Em caso de erro, usar configuração local e mostrar interface
+        setLotsConfig(LOTS.map(lot => ({ ...lot, active: true })));
+        setLotsConfigDraft(LOTS.map(lot => ({ ...lot, active: true })));
+        setIsDataLoaded(true);
+        setFirebaseStatus("Erro de conectividade");
       }
     );
 
     return () => { 
+      clearTimeout(fallbackTimeout); // Limpar timeout ao desmontar componente
       if (unsubscribe) unsubscribe();
       if (off) off();
       if (unsubscribeSales) unsubscribeSales();
