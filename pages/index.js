@@ -711,30 +711,33 @@ Por favor, me enviem a chave PIX e instruções de pagamento. Assim que eu envia
                             <label className="block text-xs text-purple-300 mb-1">Preço Normal</label>
                             <input 
                               type="number" 
-                              value={lot.price} 
+                              value={lot.price || 0} 
                               onChange={(e) => updateLotPrice(lot.id, 'price', e.target.value)}
                               className="w-full p-2 rounded bg-gray-800 text-white"
+                              min="0"
                             />
                           </div>
-                          {lot.womenPrice && (
+                          {lot.id === 'lot3' && (
                             <div>
                               <label className="block text-xs text-purple-300 mb-1">Mulher 0800</label>
                               <input 
                                 type="number" 
-                                value={lot.womenPrice} 
+                                value={lot.womenPrice || 0} 
                                 onChange={(e) => updateLotPrice(lot.id, 'womenPrice', e.target.value)}
                                 className="w-full p-2 rounded bg-gray-800 text-white"
+                                min="0"
                               />
                             </div>
                           )}
-                          {lot.couplePrice && (
+                          {lot.id === 'lot3' && (
                             <div>
                               <label className="block text-xs text-purple-300 mb-1">Casadinha</label>
                               <input 
                                 type="number" 
-                                value={lot.couplePrice} 
+                                value={lot.couplePrice || 0} 
                                 onChange={(e) => updateLotPrice(lot.id, 'couplePrice', e.target.value)}
                                 className="w-full p-2 rounded bg-gray-800 text-white"
+                                min="0"
                               />
                             </div>
                           )}
@@ -742,9 +745,10 @@ Por favor, me enviem a chave PIX e instruções de pagamento. Assim que eu envia
                             <label className="block text-xs text-purple-300 mb-1">Capacidade</label>
                             <input 
                               type="number" 
-                              value={lot.capacity} 
+                              value={lot.capacity || 0} 
                               onChange={(e) => updateLotPrice(lot.id, 'capacity', e.target.value)}
                               className="w-full p-2 rounded bg-gray-800 text-white"
+                              min="0"
                             />
                           </div>
                         </div>
