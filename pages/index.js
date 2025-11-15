@@ -312,6 +312,31 @@ export default function Home() {
     }
   }
 
+  async function resetSalesMetrics() {
+    const confirmReset = confirm(
+      "⚠️ ATENÇÃO: Isso irá remover TODAS as vendas e métricas salvas no Firebase.\n\n" +
+      "Esta ação é IRREVERSÍVEL!\n\n" +
+      "Tem certeza que deseja continuar?"
+    );
+    
+    if (!confirmReset) return;
+    
+    try {
+      // Remove todo o nó 'sales' do Firebase
+      const salesRef = ref(database, 'sales');
+      await set(salesRef, null);
+      
+      // Reset local das métricas
+      setSalesStats({ total: 0, revenue: 0, last24h: 0 });
+      
+      alert('✅ Métricas limpas com sucesso!\n\nTodas as vendas de teste foram removidas.');
+      console.log("🗑️ Sales metrics reset completed");
+    } catch (error) {
+      console.error("❌ Error resetting sales:", error.message);
+      alert('❌ Erro ao limpar métricas: ' + error.message);
+    }
+  }
+
   function discardChanges() {
     setLotsConfigDraft(lotsConfig);
     setHasUnsavedChanges(false);
@@ -774,6 +799,20 @@ Por favor, me enviem a chave PIX e instruções de pagamento. Assim que eu envia
                     <div className="text-2xl font-extrabold mt-2">{salesStats.last24h}</div>
                     <div className="text-xs text-gray-400 mt-1">Ingressos das últimas 24 horas</div>
                   </div>
+                </div>
+
+                {/* Botão de Reset das Métricas */}
+                <div className="mt-4 text-center">
+                  <button
+                    onClick={resetSalesMetrics}
+                    className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg transition-colors"
+                    title="Limpar todos os dados de vendas (irreversível)"
+                  >
+                    🗑️ Limpar Métricas de Teste
+                  </button>
+                  <p className="text-xs text-gray-400 mt-1">
+                    Remove todas as vendas salvas no Firebase (ação irreversível)
+                  </p>
                 </div>
 
                 <div className="mt-6">
