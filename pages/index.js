@@ -27,12 +27,7 @@ const LOTS = [
   { id: "lot3", name: "3º Lote", price: 40, capacity: 250, expiresAt: new Date(2026, 11, 31, 23, 59, 59), womenPrice: 40, couplePrice: 60 }, // 31 de dezembro de 2026
 ];
 
-// Admin users mock
-const ADMIN_USERS = [
-  { id: 1, name: "Super Admin", role: "super-admin", email: "ceo@loop.com" },
-  { id: 2, name: "Gestor Eventos", role: "gestor", email: "gestor@loop.com" },
-  { id: 3, name: "Financeiro", role: "financeiro", email: "finance@loop.com" },
-];
+
 
 function getRandomVagas(capacity) {
   const min = Math.max(5, Math.floor(capacity * 0.05));
@@ -776,20 +771,7 @@ Por favor, me enviem a chave PIX e instruções de pagamento. Assim que eu envia
                   </div>
                 </div>
 
-                <div className="mt-6">
-                  <h4 className="font-bold text-white mb-3">👥 Usuários com acesso</h4>
-                  <ul className="space-y-2">
-                    {ADMIN_USERS.map((a) => (
-                      <li key={a.id} className="bg-white/5 p-3 rounded flex justify-between items-center">
-                        <div>
-                          <div className="font-semibold text-white">{a.name}</div>
-                          <div className="text-xs text-purple-300">{a.role} • {a.email}</div>
-                        </div>
-                        <div className="text-sm text-green-400">✓ Ativo</div>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+
 
                 <div className="mt-6 flex justify-end">
                   <button onClick={exportSalesToCSV} className="px-4 py-2 rounded bg-blue-600 hover:bg-blue-700 text-white">📊 Exportar Vendas CSV</button>
