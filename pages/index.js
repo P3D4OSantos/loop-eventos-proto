@@ -557,7 +557,12 @@ Por favor, me enviem a chave PIX e instruções de pagamento. Assim que eu envia
           </div>
         </section>
 
-        <footer className="text-center text-xs text-blue-300 py-8">© {new Date().getFullYear()} Loop Eventos — Petrolina</footer>
+        <footer className="text-center text-xs text-blue-300 py-8">
+          © {new Date().getFullYear()} Loop Eventos — Petrolina
+          <div className="mt-2">
+            <a href="https://loop-eventos-pnz.netlify.app/" className="text-purple-400 hover:text-purple-300">loop-eventos-pnz.netlify.app</a>
+          </div>
+        </footer>
       </main>
 
       {/* Checkout Modal */}
