@@ -91,8 +91,10 @@ export default function Home() {
     const salesRef = ref(database, 'sales');
     const unsubscribeSales = onValue(salesRef, (snapshot) => {
       const data = snapshot.val();
+      console.log("📊 Sales data from Firebase:", data); // Debug log
       if (data) {
         const salesArray = Object.values(data);
+        console.log("📊 Sales array processed:", salesArray.length, "vendas"); // Debug log
         const total = salesArray.reduce((sum, sale) => sum + (sale.quantity || 0), 0);
         const revenue = salesArray.reduce((sum, sale) => sum + (sale.totalPrice || 0), 0);
         const last24h = salesArray.filter(sale => {
@@ -101,7 +103,13 @@ export default function Home() {
           return saleTime > dayAgo;
         }).reduce((sum, sale) => sum + (sale.quantity || 0), 0);
         setSalesStats({ total, revenue, last24h });
+        console.log("📊 Stats updated:", { total, revenue, last24h }); // Debug log
+      } else {
+        console.log("📊 No sales data found in Firebase"); // Debug log
+        setSalesStats({ total: 0, revenue: 0, last24h: 0 });
       }
+    }, (error) => {
+      console.error("📊 Error reading sales:", error.message); // Error log
     });
 
     // Sincronização Firebase em tempo real
@@ -410,9 +418,14 @@ export default function Home() {
 
     // Salvar venda no Firebase
     const salesRef = ref(database, `sales/${id}`);
-    set(salesRef, payload).catch(err => {
-      console.log("Erro ao salvar venda:", err.message);
-    });
+    console.log("💾 Salvando venda no Firebase:", id, payload); // Debug log
+    set(salesRef, payload)
+      .then(() => {
+        console.log("✅ Venda salva com sucesso:", id); // Success log
+      })
+      .catch(err => {
+        console.error("❌ Erro ao salvar venda:", err.message); // Error log
+      });
 
     const text = `Olá Loop Eventos!
 
