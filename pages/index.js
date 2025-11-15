@@ -10,7 +10,7 @@ const ADMIN_WA_NUMBER = "5587981758255"; // ex: 55 (Brasil) + DDD(87) + número
 // Mock data
 const EVENT = {
   id: "evt-loop-001",
-  title: "LOOP NIGHT — Petrolina (CI TEST)",
+  title: "LOOP NIGHT — Petrolina",
   date: "2025-12-13T18:00:00", // ISO
   venue: "Terra do Sul, Petrolina",
   description:
