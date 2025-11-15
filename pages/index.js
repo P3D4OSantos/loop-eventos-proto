@@ -89,9 +89,17 @@ export default function Home() {
       setAuthUid(user ? user.uid : null);
     });
 
-    // Sincronizar métricas de vendas
+    // Sincronizar métricas de vendas com detecção de problemas
     const salesRef = ref(database, 'sales');
+    
+    // Timeout para detectar problemas de conectividade  
+    let connectionTimeout = setTimeout(() => {
+      console.warn("⚠️ Firebase demorou para responder - possível problema de rede");
+      setFirebaseStatus("Conectividade lenta ou bloqueada");
+    }, 5000);
+    
     const unsubscribeSales = onValue(salesRef, (snapshot) => {
+      clearTimeout(connectionTimeout); // Cancelar timeout se dados chegaram
       const data = snapshot.val();
       console.log("📊 Sales data from Firebase:", data); // Debug log
       if (data) {
@@ -317,6 +325,44 @@ export default function Home() {
     } catch (err) {
       console.log("Firebase save error:", err.message);
       alert('Erro ao salvar. Verifique as permissões do Firebase.');
+    }
+  }
+
+  async function forceReloadData() {
+    try {
+      console.log("🔄 Forçando reload dos dados Firebase...");
+      setFirebaseStatus("Atualizando dados...");
+      
+      // Forçar nova leitura dos dados
+      const salesRef = ref(database, 'sales');
+      const snapshot = await get(salesRef);
+      const data = snapshot.val();
+      
+      console.log("🔄 Dados recarregados:", data);
+      
+      if (data) {
+        const salesArray = Object.values(data).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        setSalesData(salesArray);
+        
+        const total = salesArray.reduce((sum, sale) => sum + (sale.quantity || 0), 0);
+        const revenue = salesArray.reduce((sum, sale) => sum + (sale.totalPrice || 0), 0);
+        const last24h = salesArray.filter(sale => {
+          const saleTime = new Date(sale.timestamp);
+          const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+          return saleTime > dayAgo;
+        }).reduce((sum, sale) => sum + (sale.quantity || 0), 0);
+        setSalesStats({ total, revenue, last24h });
+        
+        setFirebaseStatus("Dados atualizados!");
+        setTimeout(() => setFirebaseStatus(""), 2000);
+      } else {
+        setSalesData([]);
+        setSalesStats({ total: 0, revenue: 0, last24h: 0 });
+        setFirebaseStatus("Nenhuma venda encontrada");
+      }
+    } catch (error) {
+      console.error("❌ Erro ao recarregar:", error.message);
+      setFirebaseStatus("Erro na atualização");
     }
   }
 
@@ -863,17 +909,26 @@ Por favor, me enviem a chave PIX e instruções de pagamento. Assim que eu envia
                   </div>
                 </div>
 
-                {/* Botão de Reset das Métricas */}
-                <div className="mt-4 text-center">
-                  <button
-                    onClick={resetSalesMetrics}
-                    className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg transition-colors"
-                    title="Limpar todos os dados de vendas (irreversível)"
-                  >
-                    🗑️ Limpar Métricas de Teste
-                  </button>
-                  <p className="text-xs text-gray-400 mt-1">
-                    Remove todas as vendas salvas no Firebase (ação irreversível)
+                {/* Botões de Controle */}
+                <div className="mt-4 text-center space-y-2">
+                  <div className="flex justify-center gap-3">
+                    <button
+                      onClick={forceReloadData}
+                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition-colors"
+                      title="Forçar atualização dos dados do Firebase"
+                    >
+                      🔄 Atualizar Dados
+                    </button>
+                    <button
+                      onClick={resetSalesMetrics}
+                      className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg transition-colors"
+                      title="Limpar todos os dados de vendas (irreversível)"
+                    >
+                      🗑️ Limpar Métricas
+                    </button>
+                  </div>
+                  <p className="text-xs text-gray-400">
+                    Use "Atualizar" se não vê vendas recentes | "Limpar" remove tudo (irreversível)
                   </p>
                 </div>
 
