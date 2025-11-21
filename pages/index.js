@@ -71,6 +71,13 @@ export default function Home() {
       LOTS.map((l) => ({ lotId: l.id, vagas: getRandomVagas(l.capacity) }))
     );
 
+    // FORÇAR USO DA CONFIGURAÇÃO LOCAL (Firebase temporariamente desabilitado)
+    console.log("🔄 Usando configuração local atualizada - 2º Lote R$ 30");
+    setLotsConfig(LOTS.map(lot => ({ ...lot, active: lot.id === 'lot1' })));
+    setLotsConfigDraft(LOTS.map(lot => ({ ...lot, active: lot.id === 'lot1' })));
+    setIsDataLoaded(true);
+    return;
+
     // Verificar se Firebase está disponível
     if (!auth || !database) {
       console.warn("Firebase não disponível, usando configuração local");
@@ -86,7 +93,7 @@ export default function Home() {
       setLotsConfig(LOTS.map(lot => ({ ...lot, active: lot.id === 'lot1' })));
       setLotsConfigDraft(LOTS.map(lot => ({ ...lot, active: lot.id === 'lot1' })));
       setIsDataLoaded(true);
-    }, 3000); // Reduzido de 5s para 3s
+    }, 1000); // Reduzido para 1 segundo para forçar uso local
 
     // Auth anônima para habilitar regras com auth != null (não bloqueante)
     signInAnonymously(auth).catch((err) => {
@@ -105,7 +112,7 @@ export default function Home() {
     let connectionTimeout = setTimeout(() => {
       console.warn("⚠️ Firebase sales demorou para responder - possível problema de rede");
       setFirebaseStatus("Vendas offline");
-    }, 3000); // Reduzido para 3s
+    }, 100); // Forçar uso da configuração local rapidamente
     
     const unsubscribeSales = onValue(salesRef, (snapshot) => {
       clearTimeout(connectionTimeout); // Cancelar timeout se dados chegaram
