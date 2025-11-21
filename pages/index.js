@@ -23,7 +23,7 @@ const EVENT = {
 
 // Lotes mock - datas bem futuras para não expirar automaticamente
 const LOTS = [
-  { id: "lot1", name: "2º Lote", price: 30, capacity: 150, expiresAt: new Date(2026, 11, 31, 23, 59, 59) }, // 31 de dezembro de 2026
+  { id: "lot1", name: "2º Lote", price: 30, capacity: 150, expiresAt: new Date(2026, 11, 31, 23, 59, 59), womenPrice: 30, couplePrice: 40 }, // 31 de dezembro de 2026
   { id: "lot2", name: "2º Lote", price: 30, capacity: 200, expiresAt: new Date(2026, 11, 31, 23, 59, 59) }, // 31 de dezembro de 2026
   { id: "lot3", name: "3º Lote", price: 40, capacity: 250, expiresAt: new Date(2026, 11, 31, 23, 59, 59), womenPrice: 40, couplePrice: 60 }, // 31 de dezembro de 2026
 ];
@@ -649,7 +649,7 @@ Por favor, me enviem a chave PIX e instruções de pagamento. Assim que eu envia
                     </div>
 
                     <div className="mt-3 flex flex-col sm:flex-row gap-2">
-                      {lot.id === "lot3" ? (
+                      {lot.couplePrice ? (
                         <button
                           onClick={() => openCheckout(lot)}
                           className="w-full sm:flex-1 rounded-md px-3 py-2 font-bold text-xs sm:text-sm" 
@@ -676,7 +676,7 @@ Por favor, me enviem a chave PIX e instruções de pagamento. Assim que eu envia
                           Quero Comprar
                         </button>
                       )}
-                      {lot.id === "lot3" && (
+                      {lot.couplePrice && (
                         <button
                           onClick={() => openCheckout(lot, "couple")}
                           className="w-full sm:flex-1 rounded-md px-3 py-2 font-bold text-xs sm:text-sm" 
@@ -687,10 +687,10 @@ Por favor, me enviem a chave PIX e instruções de pagamento. Assim que eu envia
                             cursor: 'pointer'
                           }}
                         >
-                          💍 Casadinha — R$ {lot.couplePrice || lot.price}
+                          💍 Casadinha — R$ {lot.couplePrice}
                         </button>
                       )}
-                      {lot.id !== "lot3" && (
+                      {!lot.couplePrice && (
                         <button
                           onClick={() => openCheckout(lot, "woman")}
                           className="w-full sm:bg-transparent border border-white rounded-md px-3 py-2 text-xs sm:text-sm text-white" 
