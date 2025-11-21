@@ -12,7 +12,7 @@ const ADMIN_WA_NUMBER = "5587991270398"; // ex: 55 (Brasil) + DDD(87) + número
 const EVENT = {
   id: "evt-loop-001",
   title: "LOOP NIGHT — Petrolina",
-  date: "2025-12-13T21:30:00", // ISO - Horário atualizado
+  date: "2025-12-13T21:30:00", // ISO - Horário atualizado  
   venue: "Terra do Sul, Petrolina",
   description:
     "Uma noite de som pesado, resenha e muita vibe. Pulseiras limitadas, cooler liberado com taxa, bebidas à venda.",
