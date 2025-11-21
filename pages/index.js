@@ -162,7 +162,7 @@ export default function Home() {
           // Seed inicial com configuração local caso não exista
           const initial = LOTS.map((lot) => ({
             ...lot,
-            active: lot.id === 'lot1', // Apenas 1º lote ativo por padrão
+            active: lot.id === 'lot1', // Apenas 2º lote ativo por padrão
             // Salvar como ISO string para compatibilidade
             expiresAt: lot.expiresAt instanceof Date ? lot.expiresAt.toISOString() : lot.expiresAt,
           }));
@@ -636,50 +636,63 @@ Por favor, me enviem a chave PIX e instruções de pagamento. Assim que eu envia
                   </div>
                 </div>
               ) : (
-                lotsConfig.filter(lot => lot.active).map((lot) => {
-                const vagas = vagasDisplay.find((v) => v.lotId === lot.id)?.vagas ?? 10;
-                return (
-                  <div key={lot.id} className="rounded-lg p-3 w-full sm:w-64" style={{background: 'rgba(10,10,10,0.6)', border: '1px solid rgba(124,77,255,0.18)', boxShadow: '0 0 18px rgba(124,77,255,0.06)'}}>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="text-sm font-bold text-pink-400" style={{textShadow:'0 0 8px rgba(255,77,166,0.8)'}}>{lot.name}</div>
-                        <div className="text-xs text-blue-300" style={{textShadow:'0 0 6px rgba(124,77,255,0.7)'}}>R$ {lot.price}</div>
-                        <div className="text-xs text-purple-300 mt-1">Disponível</div>
-                      </div>
-                    </div>
+                <>
+                  {lotsConfig.filter(lot => lot.active).map((lot) => {
+                    const vagas = vagasDisplay.find((v) => v.lotId === lot.id)?.vagas ?? 10;
+                    return (
+                      <div key={lot.id} className="rounded-lg p-3 w-full sm:w-64" style={{background: 'rgba(10,10,10,0.6)', border: '1px solid rgba(124,77,255,0.18)', boxShadow: '0 0 18px rgba(124,77,255,0.06)'}}>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <div className="text-sm font-bold text-pink-400" style={{textShadow:'0 0 8px rgba(255,77,166,0.8)'}}>{lot.name}</div>
+                            <div className="text-xs text-blue-300" style={{textShadow:'0 0 6px rgba(124,77,255,0.7)'}}>R$ {lot.price}</div>
+                            <div className="text-xs text-purple-300 mt-1">Disponível</div>
+                          </div>
+                        </div>
 
-                    <div className="mt-3 flex flex-col sm:flex-row gap-2">
-                      {lot.couplePrice ? (
-                        <button
-                          onClick={() => openCheckout(lot)}
-                          className="w-full sm:flex-1 rounded-md px-3 py-2 font-bold text-xs sm:text-sm" 
-                          style={{
-                            background: 'linear-gradient(90deg, #ff4da6, #7c4dff)', 
-                            color: '#ffffff', 
-                            boxShadow: '0 0 20px rgba(124,77,255,0.35), 0 0 12px rgba(255,77,166,0.25)',
-                            cursor: 'pointer'
-                          }}
-                        >
-                          👤 Normal — R$ {lot.price}
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => openCheckout(lot)}
-                          className="w-full sm:flex-1 rounded-md px-3 py-2 font-bold text-sm" 
-                          style={{
-                            background: 'linear-gradient(90deg, #ff4da6, #7c4dff)', 
-                            color: '#ffffff', 
-                            boxShadow: '0 0 20px rgba(124,77,255,0.35), 0 0 12px rgba(255,77,166,0.25)',
-                            cursor: 'pointer'
-                          }}
-                        >
-                          Quero Comprar
-                        </button>
-                      )}
-                      {lot.couplePrice && (
+                        <div className="mt-3 flex flex-col gap-2">
+                          <button
+                            onClick={() => openCheckout(lot)}
+                            className="w-full rounded-md px-3 py-2 font-bold text-sm" 
+                            style={{
+                              background: 'linear-gradient(90deg, #ff4da6, #7c4dff)', 
+                              color: '#ffffff', 
+                              boxShadow: '0 0 20px rgba(124,77,255,0.35), 0 0 12px rgba(255,77,166,0.25)',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            Quero Comprar
+                          </button>
+                          
+                          <button
+                            onClick={() => openCheckout(lot, "woman")}
+                            className="w-full border border-white rounded-md px-3 py-2 text-xs sm:text-sm text-white" 
+                            style={{
+                              textShadow:'0 0 10px rgba(255,77,166,0.8)',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            👩 Mulher 0800 — {isWomenFree() ? "FREE" : `R$ ${lot.price}`}
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                  
+                  {/* Card separado para Casadinha */}
+                  {lotsConfig.filter(lot => lot.active && lot.couplePrice).map((lot) => (
+                    <div key={`${lot.id}-couple`} className="rounded-lg p-3 w-full sm:w-64" style={{background: 'rgba(10,10,10,0.6)', border: '1px solid rgba(255,107,157,0.18)', boxShadow: '0 0 18px rgba(255,107,157,0.06)'}}>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="text-sm font-bold text-pink-400" style={{textShadow:'0 0 8px rgba(255,107,157,0.8)'}}>💍 Casadinha</div>
+                          <div className="text-xs text-blue-300" style={{textShadow:'0 0 6px rgba(255,107,157,0.7)'}}>R$ {lot.couplePrice} (2 pessoas)</div>
+                          <div className="text-xs text-purple-300 mt-1">Disponível</div>
+                        </div>
+                      </div>
+
+                      <div className="mt-3">
                         <button
                           onClick={() => openCheckout(lot, "couple")}
-                          className="w-full sm:flex-1 rounded-md px-3 py-2 font-bold text-xs sm:text-sm" 
+                          className="w-full rounded-md px-3 py-2 font-bold text-sm" 
                           style={{
                             background: 'linear-gradient(90deg, #ff6b9d, #c77dff)',
                             color: '#ffffff',
@@ -687,25 +700,12 @@ Por favor, me enviem a chave PIX e instruções de pagamento. Assim que eu envia
                             cursor: 'pointer'
                           }}
                         >
-                          💍 Casadinha — R$ {lot.couplePrice}
+                          Comprar Casadinha
                         </button>
-                      )}
-                      {!lot.couplePrice && (
-                        <button
-                          onClick={() => openCheckout(lot, "woman")}
-                          className="w-full sm:bg-transparent border border-white rounded-md px-3 py-2 text-xs sm:text-sm text-white" 
-                          style={{
-                            textShadow:'0 0 10px rgba(255,77,166,0.8)',
-                            cursor: 'pointer'
-                          }}
-                        >
-                          👩 Mulher 0800 — {isWomenFree() ? "FREE" : `R$ ${lot.price}`}
-                        </button>
-                      )}
+                      </div>
                     </div>
-                  </div>
-                );
-              })
+                  ))}
+                </>
               )}
             </div>
           </div>
