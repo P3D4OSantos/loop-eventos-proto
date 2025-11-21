@@ -23,7 +23,7 @@ const EVENT = {
 
 // Lotes mock - datas bem futuras para não expirar automaticamente
 const LOTS = [
-  { id: "lot1", name: "1º Lote", price: 25, capacity: 150, expiresAt: new Date(2026, 11, 31, 23, 59, 59) }, // 31 de dezembro de 2026
+  { id: "lot1", name: "1º Lote", price: 30, capacity: 150, expiresAt: new Date(2026, 11, 31, 23, 59, 59) }, // 31 de dezembro de 2026
   { id: "lot2", name: "2º Lote", price: 30, capacity: 200, expiresAt: new Date(2026, 11, 31, 23, 59, 59) }, // 31 de dezembro de 2026
   { id: "lot3", name: "3º Lote", price: 40, capacity: 250, expiresAt: new Date(2026, 11, 31, 23, 59, 59), womenPrice: 40, couplePrice: 60 }, // 31 de dezembro de 2026
 ];
