@@ -652,7 +652,7 @@ Por favor, me enviem a chave PIX e instruções de pagamento. Assim que eu envia
               {/* Contador Regressivo */}
               <div className="mt-3 p-3 rounded-lg" style={{background: 'linear-gradient(90deg, rgba(255,77,166,0.15), rgba(124,77,255,0.15))', border: '1px solid rgba(255,77,166,0.3)', boxShadow: '0 0 20px rgba(255,77,166,0.1)'}}>
                 <div className="text-center">
-                  <div className="text-xs text-pink-300 font-semibold mb-2">⏰ FALTAM PARA O EVENTO</div>
+                  <div className="text-xs text-pink-300 font-semibold mb-2">⏰ FALTAM PARA O EVENTO:</div>
                   <div className="flex justify-center items-center gap-2 sm:gap-4 text-white">
                     <div className="text-center">
                       <div className="text-lg sm:text-xl font-bold text-pink-400" style={{textShadow: '0 0 10px rgba(255,77,166,0.8)'}}>{countdown.days}</div>
