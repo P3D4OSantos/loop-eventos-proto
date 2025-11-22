@@ -71,13 +71,6 @@ export default function Home() {
       LOTS.map((l) => ({ lotId: l.id, vagas: getRandomVagas(l.capacity) }))
     );
 
-    // FORÇAR USO DA CONFIGURAÇÃO LOCAL (Firebase temporariamente desabilitado)
-    console.log("🔄 Usando configuração local atualizada - 2º Lote R$ 30");
-    setLotsConfig(LOTS.map(lot => ({ ...lot, active: lot.id === 'lot1' })));
-    setLotsConfigDraft(LOTS.map(lot => ({ ...lot, active: lot.id === 'lot1' })));
-    setIsDataLoaded(true);
-    return;
-
     // Verificar se Firebase está disponível
     if (!auth || !database) {
       console.warn("Firebase não disponível, usando configuração local");
@@ -112,7 +105,7 @@ export default function Home() {
     let connectionTimeout = setTimeout(() => {
       console.warn("⚠️ Firebase sales demorou para responder - possível problema de rede");
       setFirebaseStatus("Vendas offline");
-    }, 100); // Forçar uso da configuração local rapidamente
+    }, 3000); // 3 segundos para timeout do Firebase
     
     const unsubscribeSales = onValue(salesRef, (snapshot) => {
       clearTimeout(connectionTimeout); // Cancelar timeout se dados chegaram
@@ -606,7 +599,7 @@ Por favor, me enviem a chave PIX e instruções de pagamento. Assim que eu envia
             style={{border: '1px solid rgba(124,77,255,0.2)', boxShadow: '0 0 10px rgba(124,77,255,0.1)', background: 'linear-gradient(90deg, rgba(124,77,255,0.1), rgba(255,77,166,0.1))'}}
             title="Entrar no grupo aberto"
           >
-            💬 Grupo
+            💬 Grupo Aberto
           </a>
           <button
             onClick={() => setIsAdminOpen(true)}
