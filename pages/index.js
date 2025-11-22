@@ -48,6 +48,7 @@ export default function Home() {
   const [adminUsername, setAdminUsername] = useState("");
   const [adminPassword, setAdminPassword] = useState("");
   const [vagasDisplay, setVagasDisplay] = useState([]);
+  const [countdown, setCountdown] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   const [lotsConfig, setLotsConfig] = useState(LOTS.map(lot => ({ ...lot, active: lot.id === 'lot1' })));
   const [lotsConfigDraft, setLotsConfigDraft] = useState(LOTS.map(lot => ({ ...lot, active: lot.id === 'lot1' })));
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -65,6 +66,31 @@ export default function Home() {
     storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
   }), []);
+
+  // Contador regressivo para o evento
+  useEffect(() => {
+    const updateCountdown = () => {
+      const eventDate = new Date(EVENT.date);
+      const now = new Date();
+      const difference = eventDate - now;
+
+      if (difference > 0) {
+        const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+        
+        setCountdown({ days, hours, minutes, seconds });
+      } else {
+        setCountdown({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+      }
+    };
+
+    updateCountdown(); // Executa imediatamente
+    const interval = setInterval(updateCountdown, 1000); // Atualiza a cada segundo
+
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     setVagasDisplay(
@@ -622,7 +648,36 @@ Por favor, me enviem a chave PIX e instruções de pagamento. Assim que eu envia
           <div className="flex flex-col gap-3 sm:gap-4 items-start">
             <div className="w-full">
               <h2 className="text-xl sm:text-2xl font-black text-pink-500" style={{textShadow: '0 0 18px rgba(255,77,166,0.95)', color: '#ff4da6'}}>{EVENT.title}</h2>
-              <p className="text-xs sm:text-sm mt-2 text-blue-200">{EVENT.description}</p>
+              
+              {/* Contador Regressivo */}
+              <div className="mt-3 p-3 rounded-lg" style={{background: 'linear-gradient(90deg, rgba(255,77,166,0.15), rgba(124,77,255,0.15))', border: '1px solid rgba(255,77,166,0.3)', boxShadow: '0 0 20px rgba(255,77,166,0.1)'}}>
+                <div className="text-center">
+                  <div className="text-xs text-pink-300 font-semibold mb-2">⏰ FALTAM PARA O EVENTO</div>
+                  <div className="flex justify-center items-center gap-2 sm:gap-4 text-white">
+                    <div className="text-center">
+                      <div className="text-lg sm:text-xl font-bold text-pink-400" style={{textShadow: '0 0 10px rgba(255,77,166,0.8)'}}>{countdown.days}</div>
+                      <div className="text-xs text-purple-300">DIAS</div>
+                    </div>
+                    <div className="text-pink-500 text-xl">:</div>
+                    <div className="text-center">
+                      <div className="text-lg sm:text-xl font-bold text-pink-400" style={{textShadow: '0 0 10px rgba(255,77,166,0.8)'}}>{countdown.hours.toString().padStart(2, '0')}</div>
+                      <div className="text-xs text-purple-300">HORAS</div>
+                    </div>
+                    <div className="text-pink-500 text-xl">:</div>
+                    <div className="text-center">
+                      <div className="text-lg sm:text-xl font-bold text-pink-400" style={{textShadow: '0 0 10px rgba(255,77,166,0.8)'}}>{countdown.minutes.toString().padStart(2, '0')}</div>
+                      <div className="text-xs text-purple-300">MIN</div>
+                    </div>
+                    <div className="text-pink-500 text-xl">:</div>
+                    <div className="text-center">
+                      <div className="text-lg sm:text-xl font-bold text-pink-400" style={{textShadow: '0 0 10px rgba(255,77,166,0.8)'}}>{countdown.seconds.toString().padStart(2, '0')}</div>
+                      <div className="text-xs text-purple-300">SEG</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <p className="text-xs sm:text-sm mt-3 text-blue-200">{EVENT.description}</p>
               <p className="text-xs mt-2 sm:mt-3 text-purple-300">{EVENT.venue} • {eventDate.toLocaleString()}</p>
             </div>
 
